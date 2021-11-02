@@ -1,0 +1,211 @@
+<mvc:View 
+    controllerName="displayorders.controller.OrderDetail"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m" 
+    xmlns:core="sap.ui.core"
+    xmlns:f="sap.ui.layout.form"
+    xmlns:l="sap.ui.layout"
+    xmlns:semantic="sap.f.semantic">
+	
+    <semantic:SemanticPage 
+        id="detailPage" 
+        busy="{detailView>/busy}" 
+        busyIndicatorDelay="{detailView>/delay}">
+        
+        <semantic:titleHeading>
+			<Title text="Order {OrderID}" level="H2"/>
+		</semantic:titleHeading>
+
+		<semantic:headerContent>
+            <FlexBox 
+                alignItems="Start"
+				justifyContent="SpaceBetween">
+
+                <items>
+                    <Panel backgroundDesign="Transparent">
+                        <ObjectAttribute title="{i18n>shipTo}" text="{ShipName}"/>
+                        <ObjectAttribute text="{ShipCity}, {ShipRegion} {ShipPostalCode} {ShipCountry}"/>
+                    </Panel>
+                    <Panel backgroundDesign="Transparent">
+                        <ObjectAttribute title="Ordered" text="{         
+                            path: 'OrderDate', 
+                            formatter: '.formatter.date' }"/>
+
+                        <ObjectAttribute title="Shipped" text="{         
+                            path: 'ShippedDate', 
+                            formatter: '.formatter.date' }"/>
+                    </Panel>
+                </items>
+            </FlexBox>
+		</semantic:headerContent>
+
+		<semantic:content>
+            <l:VerticalLayout>
+                <IconTabBar
+                    expanded="{device>/isNoPhone}"
+                    class="sapUiResponsiveContentPadding">
+
+                    <items>
+                        <IconTabFilter 
+                            id="customerDetailsIconTabFilter"
+                            text="Customer Details" 
+                            key="customerDetails">
+                            
+                            <f:SimpleForm
+                                editable="false"
+                                layout="ColumnLayout"                            
+                                columnsM="2"
+                                columnsL="2">
+                                
+                                <f:content>
+                                    <core:Title text="Customer"/>
+                                    <Label text="Company" />
+                                    <Text text="{Customer/CompanyName}" />
+
+                                    <Label text="Name" />
+                                    <Text text="{Customer/ContactName}" />
+
+                                    <Label text="Title" />
+                                    <Text text="{Customer/ContactTitle}" />
+                                </f:content>
+                            </f:SimpleForm>
+                        </IconTabFilter>
+
+                        <IconTabFilter text="Processor Information" key="processorInformation">
+                            <f:SimpleForm
+                                editable="false"
+                                layout="ColumnLayout"                            
+                                columnsM="2"
+                                columnsL="2">
+                                
+                                <f:content>
+                                    <core:Title text="Employee" />
+                                    <Label text="Name" />
+                                    <Text text="{Employee/LastName} {Employee/FirstName}" />
+
+                                    <Label text="Title" />
+                                    <Text text="{Employee/Title}" />
+                                </f:content>
+                            </f:SimpleForm>                        
+                        </IconTabFilter>
+                    </items>
+                </IconTabBar>
+
+                <Table
+                    id="lineItemsList"
+                    class="sapUiSmallMarginTop"
+                    width="auto"
+                    items="{Order_Details}"
+                    mode="None"
+                    updateFinished=".onListUpdateFinished"
+                    noDataText="{i18n>detailLineItemTableNoDataText}"
+                    busyIndicatorDelay="{detailView>/lineItemTableDelay}">
+
+                    <headerToolbar>
+                        <Toolbar id="lineItemsToolbar">
+                            <Title
+                                id="lineItemsHeader"
+                                text="{detailView>/lineItemListTitle}"/>
+                            
+                            <ToolbarSpacer/>
+
+                            <Button 
+                                text="Create"
+                                type="Transparent"
+                                enabled="false"
+                                press=""/>
+
+                            <Button 
+                                text="Delete"
+                                type="Transparent"
+                                enabled="false"
+                                press=""/>
+                        </Toolbar>
+                    </headerToolbar>
+
+                    <columns>
+                        <Column>
+                            <Text text="{i18n>detailLineItemTableProductColumn}"/>
+                        </Column>
+
+                        <Column
+                            minScreenWidth="Tablet"
+                            demandPopin="true"
+                            hAlign="End">
+                            <Text text="{i18n>detailLineItemTableUnitPriceColumn}"/>
+                        </Column>
+
+                        <Column
+                            minScreenWidth="Tablet"
+                            demandPopin="true"
+                            hAlign="End">
+                            <Text text="{i18n>detailLineItemTableQuantityColumn}"/>
+                        </Column>
+                        
+                        <Column
+                            minScreenWidth="Tablet"
+                            demandPopin="true"
+                            hAlign="End">
+                            <Text text="{i18n>detailLineItemTableTotalColumn}"/>
+                        </Column>
+                    </columns>
+                    <items>
+                        <ColumnListItem>
+                            <cells>
+                                <ObjectIdentifier
+                                    text="{Product/ProductName}"/>
+
+                                <ObjectNumber
+                                    number="{
+                                        path: 'UnitPrice',
+                                        formatter: '.formatter.currencyValue'
+                                    }"
+                                    unit="{detailView>/currency}"/>
+
+                                <ObjectAttribute
+                                    text="{Quantity}"/>
+
+                                <ObjectNumber
+                                    number="{
+                                        parts:[
+                                            {path:'Quantity'},
+                                            {path:'UnitPrice'},
+                                            {path:'detailView>/currency'}
+                                        ],
+                                        formatter: '.formatter.calculateItemTotal'
+                                    }"
+                                    unit="{detailView>/currency}"/>
+                            </cells>
+                        </ColumnListItem>
+                    </items>
+                </Table>
+            </l:VerticalLayout>
+		</semantic:content>
+
+		<semantic:sendEmailAction>
+			<semantic:SendEmailAction
+				id="shareEmail"
+				press=".onSendEmailPress"/>
+		</semantic:sendEmailAction>
+
+		<semantic:editAction>
+			<semantic:EditAction id="editAction" enabled="false"/>
+		</semantic:editAction>
+
+		<semantic:deleteAction>
+			<semantic:DeleteAction id="deleteAction" enabled="false"/>
+		</semantic:deleteAction>
+
+		<semantic:closeAction>
+			<semantic:CloseAction id="closeColumn" press=".onCloseDetailPress"/>
+		</semantic:closeAction>
+
+		<semantic:fullScreenAction>
+			<semantic:FullScreenAction id="enterFullScreen" visible="{= !${device>/system/phone} &amp;&amp; !${appView>/actionButtonsInfo/midColumn/fullScreen}}" press=".toggleFullScreen"/>
+		</semantic:fullScreenAction>
+
+		<semantic:exitFullScreenAction>
+			<semantic:ExitFullScreenAction id="exitFullScreen" visible="{= !${device>/system/phone} &amp;&amp; ${appView>/actionButtonsInfo/midColumn/fullScreen}}" press=".toggleFullScreen"/>
+		</semantic:exitFullScreenAction>
+	</semantic:SemanticPage>
+</mvc:View>
