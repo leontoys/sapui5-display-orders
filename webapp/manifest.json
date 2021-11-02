@@ -13,7 +13,7 @@
     "ach": "ach",
     "dataSources": {
         "mainService": {
-          "uri": "/Northwind/Northwind.svc/",
+          "uri": "/api",
             "type": "OData",
             "settings": {
                 "odataVersion": "2.0",
